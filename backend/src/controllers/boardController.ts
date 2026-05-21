@@ -1,58 +1,38 @@
-import { Request, Response } from 'express';
-import Board, { IBoard } from '../models/Board';
-import { verifyToken } from '../utils/jwt';
+import { Response } from 'express';
+import Board from '../models/Board';
+import { AuthRequest } from '../middleware/requireAuth';
 
 declare global {
   var io: any;
 }
 
-export const getBoards = async (req: Request, res: Response): Promise<void> => {
+export const getBoards = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
-    if (!token) {
-      res.status(401).json({ error: 'No token provided' });
-      return;
-    }
-
-    const decoded = verifyToken(token);
-    if (!decoded) {
-      res.status(401).json({ error: 'Invalid token' });
-      return;
-    }
-
-    const boards = await Board.find({ owner: decoded.userId })
+    const boards = await Board.find({ owner: req.user!.userId })
       .populate('owner', 'email')
       .sort({ updatedAt: -1 });
 
-    res.json({
-      success: true,
-      boards
-    });
+    res.json({ success: true, boards });
   } catch (error) {
     console.error('Get boards error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 };
 
-export const getBoard = async (req: Request, res: Response): Promise<void> => {
+export const getBoard = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
+
     const { boardId } = req.params;
 
-    if (!token || !boardId) {
+    if (!boardId) {
       res.status(400).json({ error: 'Missing token or boardId' });
       return;
     }
 
-    const decoded = verifyToken(token);
-    if (!decoded) {
-      res.status(401).json({ error: 'Invalid token' });
-      return;
-    }
 
     const board = await Board.findOne({
       _id: boardId,
-      owner: decoded.userId,
+      owner: req.user!.userId,
     }).populate('owner', 'email');
 
     if (!board) {
@@ -70,25 +50,18 @@ export const getBoard = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const createBoard = async (req: Request, res: Response): Promise<void> => {
+export const createBoard = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
     const { name } = req.body;
 
-    if (!token || !name) {
+    if (!name) {
       res.status(400).json({ error: 'Token and name required' });
-      return;
-    }
-
-    const decoded = verifyToken(token);
-    if (!decoded) {
-      res.status(401).json({ error: 'Invalid token' });
       return;
     }
 
     const board = new Board({
       name,
-      owner: decoded.userId
+      owner: req.user!.userId
     });
     await board.save();
 
@@ -110,25 +83,18 @@ export const createBoard = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const deleteBoard = async (req: Request, res: Response): Promise<void> => {
+export const deleteBoard = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
     const { boardId } = req.params;
 
-    if (!token || !boardId) {
+    if (!boardId) {
       res.status(400).json({ error: 'Missing token or boardId' });
-      return;
-    }
-
-    const decoded = verifyToken(token);
-    if (!decoded) {
-      res.status(401).json({ error: 'Invalid token' });
       return;
     }
 
     const board = await Board.findOneAndDelete({
       _id: boardId,
-      owner: decoded.userId
+      owner: req.user!.userId
     });
 
     if (!board) {
@@ -148,25 +114,19 @@ export const deleteBoard = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const updateBoard = async (req: Request, res: Response): Promise<void> => {
+export const updateBoard = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
     const { boardId } = req.params;
     const { name } = req.body;
 
-    if (!token || !boardId || !name) {
+    if (!boardId || !name) {
       res.status(400).json({ error: 'Missing token, boardId or name' });
       return;
     }
 
-    const decoded = verifyToken(token);
-    if (!decoded) {
-      res.status(401).json({ error: 'Invalid token' });
-      return;
-    }
 
     const board = await Board.findOneAndUpdate(
-      { _id: boardId, owner: decoded.userId },
+      { _id: boardId, owner: req.user!.userId },
       { name, updatedAt: new Date() },
       { new: true }
     ).populate('owner', 'email');

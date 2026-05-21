@@ -1,12 +1,17 @@
 import { Router } from 'express';
-import {  
-  getTasksByBoard, 
-  createTask, 
-  updateTask, 
-  deleteTask 
+import {
+  getTasksByBoard,
+  createTask,
+  updateTask,
+  deleteTask
 } from '../controllers/taskController';
+import { requireAuth } from '../middleware/requireAuth';
+
 
 const router = Router();
+
+router.use(requireAuth);
+
 
 router.get('/board/:boardId', getTasksByBoard);
 router.post('/', createTask);
