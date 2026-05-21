@@ -108,7 +108,11 @@ export const useTasks = () => {
       }
 
       const data = await res.json();
-
+      setTasks(prev =>
+        prev.map(task =>
+          task._id === taskId ? data.task : task
+        )
+      );
 
       return data.task;
     } catch (error: any) {
@@ -116,7 +120,7 @@ export const useTasks = () => {
       setError(error.message || 'Failed to update task');
       throw error;
     }
-  }, [token, socket, boardId, tasks]);
+  }, [token]);
 
   const deleteTask = useCallback(async (taskId: string) => {
     if (!confirm('Delete this task?')) return;

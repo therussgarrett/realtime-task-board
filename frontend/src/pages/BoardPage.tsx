@@ -44,6 +44,9 @@ const BoardPage: React.FC = () => {
   }, [boardId, token]);
 
   const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
 
   const handleCreateTask = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -60,13 +63,7 @@ const BoardPage: React.FC = () => {
     }
   };
 
-  const handleStatusChange = async (taskId: string, newStatus: Task['status']) => {
-    try {
-      await updateTask(taskId, { status: newStatus });
-    } catch (error) {
-      console.error('Failed to update task:', error);
-    }
-  };
+
 
   if (loading) {
     return (
@@ -79,6 +76,40 @@ const BoardPage: React.FC = () => {
       </div>
     );
   }
+  const handleStatusChange = async (taskId: string, newStatus: Task['status']) => {
+
+    try {
+      await updateTask(taskId, { status: newStatus });
+    } catch (error) {
+      console.error('Failed to update task:', error);
+    }
+  };
+  const startEditing = (task: Task) => {
+    setEditingTaskId(task._id);
+    setEditTitle(task.title);
+    setEditDescription(task.description || '');
+  };
+
+  const cancelEditing = () => {
+    setEditingTaskId(null);
+    setEditTitle('');
+    setEditDescription('');
+  };
+
+  const handleSaveEdit = async (taskId: string) => {
+    if (!editTitle.trim()) return;
+
+    try {
+      await updateTask(taskId, {
+        title: editTitle.trim(),
+        description: editDescription.trim(),
+      });
+
+      cancelEditing();
+    } catch (error) {
+      console.error('Failed to edit task:', error);
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -139,35 +170,79 @@ const BoardPage: React.FC = () => {
                 .sort((a, b) => a.position - b.position)
                 .map(task => (
                   <div key={task._id} className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all group">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-medium text-gray-900 text-lg">{task.title}</h3>
-                      <select
-                        value={task.status}
-                        onChange={(e) => handleStatusChange(task._id, e.target.value as Task['status'])}
-                        className="ml-2 px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="todo">Todo</option>
-                        <option value="in-progress">In Progress</option>
-                        <option value="done">Done</option>
-                      </select>
-                      <div className="flex items-center justify-between mb-2">
+                    {editingTaskId === task._id ? (
+                      <div className="space-y-3">
+                        <input
+                          value={editTitle}
+                          onChange={(e) => setEditTitle(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                          placeholder="Task title"
+                        />
+
+                        <textarea
+                          value={editDescription}
+                          onChange={(e) => setEditDescription(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                          placeholder="Task description"
+                          rows={3}
+                        />
+
                         <div className="flex gap-2">
                           <button
-                            onClick={() => deleteTask(task._id)}
-                            className="text-red-500 hover:text-red-700 p-1"
-                            title="Delete"
+                            onClick={() => handleSaveEdit(task._id)}
+                            className="px-3 py-1 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700"
                           >
-                            🗑️
+                            Save
+                          </button>
+
+                          <button
+                            onClick={cancelEditing}
+                            className="px-3 py-1 text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                          >
+                            Cancel
                           </button>
                         </div>
                       </div>
+                    ) : (
+                      <>
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-medium text-gray-900 text-lg">{task.title}</h3>
 
-                    </div>
-                    {task.description && (
-                      <p className="text-sm text-gray-600 mb-2">{task.description}</p>
-                    )}
-                    {task.assignee && (
-                      <p className="text-xs text-gray-500">@{task.assignee.email}</p>
+                          <select
+                            value={task.status}
+                            onChange={(e) => handleStatusChange(task._id, e.target.value as Task['status'])}
+                            className="ml-2 px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="todo">Todo</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="done">Done</option>
+                          </select>
+                        </div>
+
+                        {task.description && (
+                          <p className="text-sm text-gray-600 mb-2">{task.description}</p>
+                        )}
+
+                        {task.assignee && (
+                          <p className="text-xs text-gray-500 mb-3">@{task.assignee.email}</p>
+                        )}
+
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => startEditing(task)}
+                            className="text-blue-600 hover:text-blue-800 text-sm"
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            onClick={() => deleteTask(task._id)}
+                            className="text-red-500 hover:text-red-700 text-sm"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </>
                     )}
                   </div>
                 ))}

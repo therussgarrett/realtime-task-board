@@ -12,7 +12,6 @@ const router = Router();
 
 router.use(requireAuth);
 
-
 router.get('/board/:boardId', getTasksByBoard);
 router.post('/', createTask);
 router.put('/:taskId', updateTask);

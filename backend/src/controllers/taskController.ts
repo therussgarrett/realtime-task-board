@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
-import Task, { ITask } from '../models/Task';
+import { Response } from 'express';
+import Task from '../models/Task';
 import Board from '../models/Board';
-import { verifyToken } from '../utils/jwt';
+import { AuthRequest } from '../middleware/requireAuth';
 
 interface CreateTaskBody {
   title: string;
@@ -11,18 +11,15 @@ interface CreateTaskBody {
   position?: number;
 }
 
-export const getTasksByBoard = async (req: Request, res: Response): Promise<void> => {
+export const getTasksByBoard = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
-    const decoded = verifyToken(token!);
-    if (!decoded) {
-      res.status(401).json({ error: 'Invalid token' });
-      return;
-    }
     const { boardId } = req.params;
 
-    // Verify user owns board
-    const board = await Board.findOne({ _id: boardId, owner: decoded.userId });
+    const board = await Board.findOne({
+      _id: boardId,
+      owner: req.user!.userId,
+    });
+
     if (!board) {
       res.status(404).json({ error: 'Board not found' });
       return;
@@ -34,7 +31,7 @@ export const getTasksByBoard = async (req: Request, res: Response): Promise<void
 
     res.json({
       success: true,
-      tasks
+      tasks,
     });
   } catch (error) {
     console.error('Get tasks error:', error);
@@ -42,17 +39,15 @@ export const getTasksByBoard = async (req: Request, res: Response): Promise<void
   }
 };
 
-export const createTask = async (req: Request, res: Response): Promise<void> => {
+export const createTask = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
-    const decoded = verifyToken(token!);
-    if (!decoded) {
-      res.status(401).json({ error: 'Invalid token' });
-      return;
-    }
     const { title, description, status, boardId, position }: CreateTaskBody = req.body;
 
-    const board = await Board.findOne({ _id: boardId, owner: decoded.userId });
+    const board = await Board.findOne({
+      _id: boardId,
+      owner: req.user!.userId,
+    });
+
     if (!board) {
       res.status(404).json({ error: 'Board not found' });
       return;
@@ -64,22 +59,25 @@ export const createTask = async (req: Request, res: Response): Promise<void> => 
       status: status || 'todo',
       board: boardId,
       position: position || 0,
-      assignee: decoded.userId
+      assignee: req.user!.userId,
     });
+
     await task.save();
 
     const populatedTask = await Task.findById(task._id)
       .populate('assignee', 'email')
       .populate('board', 'name');
 
-    (global.io as any).to(`board:${boardId}`).emit('task-updated', {
-      boardId,
-      task: populatedTask
-    });
+    if (global.io) {
+      global.io.to(`board:${boardId}`).emit('task-updated', {
+        boardId,
+        task: populatedTask,
+      });
+    }
 
     res.status(201).json({
       success: true,
-      task: populatedTask
+      task: populatedTask,
     });
   } catch (error) {
     console.error('Create task error:', error);
@@ -87,38 +85,46 @@ export const createTask = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const updateTask = async (req: Request, res: Response): Promise<void> => {
+export const updateTask = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
-    const decoded = verifyToken(token!);
-    if (!decoded) {
-      res.status(401).json({ error: 'Invalid token' });
-      return;
-    }
     const { taskId } = req.params;
-    const updates = req.body;
+    const { title, description, status, position } = req.body;
 
-    const task = await Task.findOne({ _id: taskId, board: { $in: await Board.distinct('_id', { owner: decoded.userId }) } });
+    const userBoardIds = await Board.distinct('_id', {
+      owner: req.user!.userId,
+    });
+
+    const task = await Task.findOne({
+      _id: taskId,
+      board: { $in: userBoardIds },
+    });
+
     if (!task) {
       res.status(404).json({ error: 'Task not found' });
       return;
     }
 
-    Object.assign(task, updates);
+    if (title !== undefined) task.title = title;
+    if (description !== undefined) task.description = description;
+    if (status !== undefined) task.status = status;
+    if (position !== undefined) task.position = position;
+
     await task.save();
 
     const populatedTask = await Task.findById(task._id)
       .populate('assignee', 'email')
       .populate('board', 'name');
 
-    (global.io as any).to(`board:${task.board!.toString()}`).emit('task-updated', {
-      boardId: task.board!.toString(),
-      task: populatedTask
-    });
+    if (global.io) {
+      global.io.to(`board:${task.board!.toString()}`).emit('task-updated', {
+        boardId: task.board!.toString(),
+        task: populatedTask,
+      });
+    }
 
     res.json({
       success: true,
-      task: populatedTask
+      task: populatedTask,
     });
   } catch (error) {
     console.error('Update task error:', error);
@@ -126,23 +132,17 @@ export const updateTask = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const deleteTask = async (req: Request, res: Response): Promise<void> => {
+export const deleteTask = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
     const { taskId } = req.params;
 
-    if (!token || !taskId) {
-      res.status(400).json({ error: 'Missing token or taskId' });
-      return;
-    }
-
-    const decoded = verifyToken(token);
-    if (!decoded) {
-      res.status(401).json({ error: 'Invalid token' });
+    if (!taskId) {
+      res.status(400).json({ error: 'Missing taskId' });
       return;
     }
 
     const task = await Task.findById(taskId);
+
     if (!task) {
       res.status(404).json({ error: 'Task not found' });
       return;
@@ -150,8 +150,9 @@ export const deleteTask = async (req: Request, res: Response): Promise<void> => 
 
     const board = await Board.findOne({
       _id: task.board,
-      owner: decoded.userId
+      owner: req.user!.userId,
     });
+
     if (!board) {
       res.status(403).json({ error: 'Not authorized' });
       return;
