@@ -58,9 +58,9 @@ export const createTask = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    const task = new Task({ 
-      title, 
-      description, 
+    const task = new Task({
+      title,
+      description,
       status: status || 'todo',
       board: boardId,
       position: position || 0,
@@ -72,9 +72,9 @@ export const createTask = async (req: Request, res: Response): Promise<void> => 
       .populate('assignee', 'email')
       .populate('board', 'name');
 
-    (global.io as any).to(`board:${boardId}`).emit('task-updated', { 
-      boardId, 
-      task: populatedTask 
+    (global.io as any).to(`board:${boardId}`).emit('task-updated', {
+      boardId,
+      task: populatedTask
     });
 
     res.status(201).json({
@@ -106,14 +106,14 @@ export const updateTask = async (req: Request, res: Response): Promise<void> => 
 
     Object.assign(task, updates);
     await task.save();
-  
+
     const populatedTask = await Task.findById(task._id)
       .populate('assignee', 'email')
       .populate('board', 'name');
 
-    (global.io as any).to(`board:${task.board!.toString()}`).emit('task-updated', { 
+    (global.io as any).to(`board:${task.board!.toString()}`).emit('task-updated', {
       boardId: task.board!.toString(),
-      task: populatedTask 
+      task: populatedTask
     });
 
     res.json({
@@ -130,7 +130,7 @@ export const deleteTask = async (req: Request, res: Response): Promise<void> => 
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
     const { taskId } = req.params;
-    
+
     if (!token || !taskId) {
       res.status(400).json({ error: 'Missing token or taskId' });
       return;
@@ -148,31 +148,21 @@ export const deleteTask = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-        const board = await Board.findOne({ 
-      _id: task.board, 
-      owner: decoded.userId 
+    const board = await Board.findOne({
+      _id: task.board,
+      owner: decoded.userId
     });
     if (!board) {
       res.status(403).json({ error: 'Not authorized' });
       return;
     }
-    
+
     await Task.findByIdAndDelete(taskId);
 
-    if (global.io && task) {
-      console.log('🗑️ Broadcasting task-deleted:', taskId);
-      global.io.to(`board:${task.board}`).emit('task-deleted', taskId);
-    }
-    if (!task) {
-      res.status(404).json({ error: 'Task not found' });
-      return;
-    }
-
     if (global.io) {
-      console.log('🗑️ Broadcasting task-deleted:', taskId);
-      global.io.to(`board:${task.board}`).emit('task-deleted', { 
-        boardId: task.board, 
-        taskId 
+      global.io.to(`board:${task.board.toString()}`).emit('task-deleted', {
+        boardId: task.board.toString(),
+        taskId,
       });
     }
 

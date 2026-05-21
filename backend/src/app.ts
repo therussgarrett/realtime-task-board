@@ -42,46 +42,42 @@ export class App {
   }
 
   private initializeRoutes(): void {
-  // Auth routes - using require since we're CommonJS
-  const authRoutes = require('../src/routes/authRoutes');
-  this.app.use('/api/auth', authRoutes);
+    // Auth routes - using require since we're CommonJS
+    const authRoutes = require('../src/routes/authRoutes');
+    this.app.use('/api/auth', authRoutes);
 
-  const boardRoutes = require('../src/routes/boardRoutes');
-  this.app.use('/api/boards', boardRoutes);
+    const boardRoutes = require('../src/routes/boardRoutes');
+    this.app.use('/api/boards', boardRoutes);
 
-  const taskRoutes = require('../src/routes/taskRoutes');
-  this.app.use('/api/tasks', taskRoutes);
+    const taskRoutes = require('../src/routes/taskRoutes');
+    this.app.use('/api/tasks', taskRoutes);
 
-  // Root API
-  this.app.get('/api', (req: Request, res: Response) => {
-    res.json({ message: 'Realtime Task Board API v1' });
-  });
- }
+    // Root API
+    this.app.get('/api', (req: Request, res: Response) => {
+      res.json({ message: 'Realtime Task Board API v1' });
+    });
+  }
 
 
   private initializeSocketHandlers(): void {
     global.io = this.io;
     this.io.on('connection', (socket) => {
       console.log('Client connected:', socket.id);
-      
-    // Join user's boards room
-    socket.on('join-board', (boardId: string) => {
-      socket.join(`board:${boardId}`);
-      console.log(`User ${socket.id} joined board ${boardId}`);
+
+      // Join user's boards room
+      socket.on('join-board', (boardId: string) => {
+        socket.join(`board:${boardId}`);
+        console.log(`User ${socket.id} joined board ${boardId}`);
       });
 
-    // Broadcast board changes
-    socket.on('board-updated', (data: { boardId: string; board: any }) => {
-      this.io.to(`board:${data.boardId}`).emit('board-changed', data.board);
+      // Broadcast board changes
+      socket.on('board-updated', (data: { boardId: string; board: any }) => {
+        this.io.to(`board:${data.boardId}`).emit('board-changed', data.board);
       });
 
-    socket.on('task-updated', (data: { boardId: string; task: any }) => {
-      console.log('📡 Broadcasting task-updated:', data.task._id); //DEBUG
-      socket.to(`board:${data.boardId}`).emit('task-updated', data);
-});
 
-    socket.on('disconnect', () => {
-      console.log('Client disconnected:', socket.id);
+      socket.on('disconnect', () => {
+        console.log('Client disconnected:', socket.id);
       });
     });
   }
