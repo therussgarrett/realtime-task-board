@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 
 const BoardPage: React.FC = () => {
+  const { boardName } = useParams<{ boardName: string }>();
   const { boardId } = useParams<{ boardId: string }>();
   const { socket } = useSocket();
   const { tasks, loading, createTask, updateTask, deleteTask } = useTasks();
@@ -59,7 +60,9 @@ const BoardPage: React.FC = () => {
     <div className="max-w-6xl mx-auto p-6">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Board #{boardId}</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {decodeURIComponent(boardName || 'Board')}
+          </h1>
           <p className="text-gray-600">{tasks.length} tasks</p>
         </div>
         <div className="flex gap-2">

@@ -20,8 +20,8 @@ function AppContent() {
             {user ? (
               <>
                 <span className="text-sm text-gray-700">Hi, {user.email}</span>
-                <Link 
-                  to="/boards" 
+                <Link
+                  to="/boards"
                   className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 text-sm"
                 >
                   Boards
@@ -36,8 +36,8 @@ function AppContent() {
             ) : (
               <>
                 <Link to="/login" className="text-gray-600 hover:text-gray-900 text-sm">Login</Link>
-                <Link 
-                  to="/register" 
+                <Link
+                  to="/register"
                   className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 text-sm"
                 >
                   Sign Up
@@ -54,7 +54,7 @@ function AppContent() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/boards" element={<BoardsPage />} />
         <Route path="/" element={<BoardsPage />} />
-        <Route path="/boards/:boardId" element={<BoardPage />} />
+        <Route path="/boards/:boardId/:boardName" element={<BoardPage />} />
         <Route path="/board/:boardId" element={<BoardPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

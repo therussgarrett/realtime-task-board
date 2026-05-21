@@ -7,7 +7,7 @@ const BoardsPage: React.FC = () => {
   const navigate = useNavigate();
   const { boards, loading, error, createBoard, renameBoard, deleteBoard } = useBoards();
   const { logout } = useAuth();
-  
+
   const [newBoardName, setNewBoardName] = useState('');
   const [editingBoardId, setEditingBoardId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
@@ -27,6 +27,7 @@ const BoardsPage: React.FC = () => {
     setEditingBoardId(boardId);
     setEditName(name);
   };
+
 
   const saveRename = async () => {
     if (!editingBoardId || !editName.trim()) return;
@@ -69,61 +70,61 @@ const BoardsPage: React.FC = () => {
 
       <div className="space-y-3">
         {boards.map(board => (
-  <div 
-    key={board._id} 
-    className="flex items-center gap-4 p-4 bg-white border rounded-lg hover:shadow-md cursor-pointer transition-all group"
-    onClick={() => {
-  console.log('🚀 Navigating to:', `/boards/${board._id}`);  // DEBUG
-  navigate(`/boards/${board._id}`);
-}}
-  >
-    {editingBoardId === board._id ? (
-      <input
-        autoFocus
-        value={editName}
-        onChange={e => setEditName(e.target.value)}
-        onBlur={saveRename}
-        onKeyDown={e => {
-          e.stopPropagation();
-          if (e.key === 'Enter') saveRename();
-          if (e.key === 'Escape') setEditingBoardId(null);
-        }}
-        className="flex-1 p-2 border rounded focus:ring-2"
-      />
-    ) : (
-      <h3 className="flex-1 font-semibold text-xl">
-        {board.name}
-      </h3>
-    )}
-    
-    {editingBoardId !== board._id && (
-      <>
-        <button 
-          onClick={e => { 
-            e.stopPropagation(); 
-            startEdit(board._id, board.name);
-          }}
-          className="px-3 py-1 text-blue-600 hover:bg-blue-50 rounded opacity-0 group-hover:opacity-100 transition"
-        >
-          ✏️
-        </button>
-        <button 
-          onClick={e => { 
-            e.stopPropagation(); 
-            deleteBoard(board._id); 
-          }}
-          className="px-3 py-1 text-red-600 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition"
-        >
-          🗑️
-        </button>
-      </>
-    )}
-  </div>
-))}
+          <div
+            key={board._id}
+            className="flex items-center gap-4 p-4 bg-white border rounded-lg hover:shadow-md cursor-pointer transition-all group"
+            onClick={() => {
+              console.log('🚀 Navigating to:', `/boards/${board._id}`);  // DEBUG
+              navigate(`/boards/${board._id}/${encodeURIComponent(board.name)}`);
+            }}
+          >
+            {editingBoardId === board._id ? (
+              <input
+                autoFocus
+                value={editName}
+                onChange={e => setEditName(e.target.value)}
+                onBlur={saveRename}
+                onKeyDown={e => {
+                  e.stopPropagation();
+                  if (e.key === 'Enter') saveRename();
+                  if (e.key === 'Escape') setEditingBoardId(null);
+                }}
+                className="flex-1 p-2 border rounded focus:ring-2"
+              />
+            ) : (
+              <h3 className="flex-1 font-semibold text-xl">
+                {board.name}
+              </h3>
+            )}
+
+            {editingBoardId !== board._id && (
+              <>
+                <button
+                  onClick={e => {
+                    e.stopPropagation();
+                    startEdit(board._id, board.name);
+                  }}
+                  className="px-3 py-1 text-blue-600 hover:bg-blue-50 rounded opacity-0 group-hover:opacity-100 transition"
+                >
+                  ✏️
+                </button>
+                <button
+                  onClick={e => {
+                    e.stopPropagation();
+                    deleteBoard(board._id);
+                  }}
+                  className="px-3 py-1 text-red-600 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100 transition"
+                >
+                  🗑️
+                </button>
+              </>
+            )}
+          </div>
+        ))}
 
 
       </div>
-      
+
       {boards.length === 0 && !loading && (
         <div className="text-center py-16 text-gray-500">
           No boards yet. Create one above!
