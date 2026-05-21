@@ -5,6 +5,7 @@ import RegisterForm from './components/Auth/RegisterForm';
 import { SocketProvider } from './context/SocketContext';
 import BoardsPage from './pages/BoardsPage';
 import BoardPage from './pages/BoardPage'
+import { ProtectedRoute } from './components/Common/ProtectedRoute';
 
 function AppContent() {
   const { user, logout } = useAuth();
@@ -52,10 +53,9 @@ function AppContent() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/boards" element={<BoardsPage />} />
-        <Route path="/" element={<BoardsPage />} />
-        <Route path="/boards/:boardId/:boardName" element={<BoardPage />} />
-        <Route path="/board/:boardId" element={<BoardPage />} />
+        <Route path="/boards" element={<ProtectedRoute><BoardsPage /></ProtectedRoute>} />
+
+        <Route path="/boards/:boardId" element={<ProtectedRoute><BoardPage /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>

@@ -34,6 +34,42 @@ export const getBoards = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+export const getBoard = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    const { boardId } = req.params;
+
+    if (!token || !boardId) {
+      res.status(400).json({ error: 'Missing token or boardId' });
+      return;
+    }
+
+    const decoded = verifyToken(token);
+    if (!decoded) {
+      res.status(401).json({ error: 'Invalid token' });
+      return;
+    }
+
+    const board = await Board.findOne({
+      _id: boardId,
+      owner: decoded.userId,
+    }).populate('owner', 'email');
+
+    if (!board) {
+      res.status(404).json({ error: 'Board not found' });
+      return;
+    }
+
+    res.json({
+      success: true,
+      board,
+    });
+  } catch (error) {
+    console.error('Get board error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 export const createBoard = async (req: Request, res: Response): Promise<void> => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
@@ -50,19 +86,19 @@ export const createBoard = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    const board = new Board({ 
-      name, 
-      owner: decoded.userId 
+    const board = new Board({
+      name,
+      owner: decoded.userId
     });
     await board.save();
 
     const populatedBoard = await Board.findById(board._id)
       .populate('owner', 'email');
 
-  if (global.io && populatedBoard) {
-    console.log('📡 Broadcasting board-changed:', populatedBoard._id);
-    global.io.emit('board-changed', populatedBoard);
-  }
+    if (global.io && populatedBoard) {
+      console.log('📡 Broadcasting board-changed:', populatedBoard._id);
+      global.io.emit('board-changed', populatedBoard);
+    }
 
     res.status(201).json({
       success: true,
@@ -78,7 +114,7 @@ export const deleteBoard = async (req: Request, res: Response): Promise<void> =>
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
     const { boardId } = req.params;
-    
+
     if (!token || !boardId) {
       res.status(400).json({ error: 'Missing token or boardId' });
       return;
@@ -90,11 +126,11 @@ export const deleteBoard = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    const board = await Board.findOneAndDelete({ 
-      _id: boardId, 
-      owner: decoded.userId 
+    const board = await Board.findOneAndDelete({
+      _id: boardId,
+      owner: decoded.userId
     });
-    
+
     if (!board) {
       res.status(404).json({ error: 'Board not found' });
       return;
@@ -117,7 +153,7 @@ export const updateBoard = async (req: Request, res: Response): Promise<void> =>
     const token = req.headers.authorization?.replace('Bearer ', '');
     const { boardId } = req.params;
     const { name } = req.body;
-    
+
     if (!token || !boardId || !name) {
       res.status(400).json({ error: 'Missing token, boardId or name' });
       return;
@@ -134,7 +170,7 @@ export const updateBoard = async (req: Request, res: Response): Promise<void> =>
       { name, updatedAt: new Date() },
       { new: true }
     ).populate('owner', 'email');
-    
+
     if (!board) {
       res.status(404).json({ error: 'Board not found' });
       return;

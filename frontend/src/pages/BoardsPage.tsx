@@ -75,7 +75,7 @@ const BoardsPage: React.FC = () => {
             className="flex items-center gap-4 p-4 bg-white border rounded-lg hover:shadow-md cursor-pointer transition-all group"
             onClick={() => {
               console.log('🚀 Navigating to:', `/boards/${board._id}`);  // DEBUG
-              navigate(`/boards/${board._id}/${encodeURIComponent(board.name)}`);
+              navigate(`/boards/${board._id}`);
             }}
           >
             {editingBoardId === board._id ? (

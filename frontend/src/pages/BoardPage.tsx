@@ -4,12 +4,13 @@ import { useTasks, Task } from '../hooks/useTasks';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 
+
 const BoardPage: React.FC = () => {
-  const { boardName } = useParams<{ boardName: string }>();
+  const [boardName, setBoardName] = useState('Board');
   const { boardId } = useParams<{ boardId: string }>();
   const { socket } = useSocket();
   const { tasks, loading, createTask, updateTask, deleteTask } = useTasks();
-  const { logout } = useAuth();
+  const { logout, token } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,6 +19,29 @@ const BoardPage: React.FC = () => {
       socket.emit('join-board', boardId);
     }
   }, [socket, boardId]);
+
+  useEffect(() => {
+    const fetchBoard = async () => {
+      if (!boardId || !token) return;
+
+      try {
+        const res = await fetch(`/api/boards/${boardId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) throw new Error('Failed to fetch board');
+
+        const data = await res.json();
+        setBoardName(data.board.name);
+      } catch (error) {
+        console.error('Failed to fetch board:', error);
+      }
+    };
+
+    fetchBoard();
+  }, [boardId, token]);
 
   const [newTaskTitle, setNewTaskTitle] = useState('');
 
@@ -61,7 +85,7 @@ const BoardPage: React.FC = () => {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            {decodeURIComponent(boardName || 'Board')}
+            {boardName}
           </h1>
           <p className="text-gray-600">{tasks.length} tasks</p>
         </div>
