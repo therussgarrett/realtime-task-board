@@ -3,6 +3,8 @@ import cors from 'cors';
 import http from 'http';
 import { Server } from 'socket.io';
 import connectDB from './config/db';
+import { verifyToken } from './utils/jwt';
+import Board from './models/Board';
 
 declare global {
   var io: any;
@@ -61,20 +63,56 @@ export class App {
 
   private initializeSocketHandlers(): void {
     global.io = this.io;
+
+    this.io.use((socket, next) => {
+      const token = socket.handshake.auth?.token;
+
+      if (!token) {
+        return next(new Error('Authentication required'));
+      }
+
+      const decoded = verifyToken(token);
+
+      if (!decoded) {
+        return next(new Error('Invalid token'));
+      }
+
+      socket.data.user = decoded;
+      next();
+    });
+
     this.io.on('connection', (socket) => {
       console.log('Client connected:', socket.id);
 
-      // Join user's boards room
-      socket.on('join-board', (boardId: string) => {
-        socket.join(`board:${boardId}`);
-        console.log(`User ${socket.id} joined board ${boardId}`);
+      socket.on('join-board', async (boardId: string) => {
+        try {
+          const board = await Board.findOne({
+            _id: boardId,
+            owner: socket.data.user.userId,
+          });
+
+          if (!board) {
+            console.log(`Blocked unauthorized board join: ${boardId}`);
+            return;
+          }
+
+          socket.join(`board:${boardId}`);
+
+          console.log(
+            `User ${socket.data.user.userId} joined board ${boardId}`
+          );
+        } catch (error) {
+          console.error('Join board error:', error);
+        }
       });
 
-      // Broadcast board changes
-      socket.on('board-updated', (data: { boardId: string; board: any }) => {
-        this.io.to(`board:${data.boardId}`).emit('board-changed', data.board);
-      });
+      socket.on('leave-board', (boardId: string) => {
+        socket.leave(`board:${boardId}`);
 
+        console.log(
+          `User ${socket.data.user.userId} left board ${boardId}`
+        );
+      });
 
       socket.on('disconnect', () => {
         console.log('Client disconnected:', socket.id);
