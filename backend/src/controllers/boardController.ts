@@ -2,9 +2,6 @@ import { Response } from 'express';
 import Board from '../models/Board';
 import { AuthRequest } from '../middleware/requireAuth';
 
-declare global {
-  var io: any;
-}
 
 export const getBoards = async (req: AuthRequest, res: Response): Promise<void> => {
   try {

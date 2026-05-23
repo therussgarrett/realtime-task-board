@@ -7,19 +7,25 @@ import { verifyToken } from './utils/jwt';
 import Board from './models/Board';
 
 declare global {
-  var io: any;
+  var io: Server;
 }
+
 export class App {
   public app: Application;
   public server: http.Server;
   public io: Server;
 
+  private allowedOrigin: string;
+
   constructor() {
+    this.allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
+
     this.app = express();
     this.server = http.createServer(this.app);
+
     this.io = new Server(this.server, {
       cors: {
-        origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+        origin: this.allowedOrigin,
         credentials: true,
       },
     });
@@ -27,14 +33,18 @@ export class App {
     this.initializeMiddlewares();
     this.initializeRoutes();
     this.initializeSocketHandlers();
+
     connectDB().catch(console.error);
   }
 
   private initializeMiddlewares(): void {
-    this.app.use(cors({
-      origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-      credentials: true,
-    }));
+    this.app.use(
+      cors({
+        origin: this.allowedOrigin,
+        credentials: true,
+      })
+    );
+
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
 
@@ -44,22 +54,19 @@ export class App {
   }
 
   private initializeRoutes(): void {
-    // Auth routes - using require since we're CommonJS
-    const authRoutes = require('../src/routes/authRoutes');
+    const authRoutes = require('./routes/authRoutes');
     this.app.use('/api/auth', authRoutes);
 
-    const boardRoutes = require('../src/routes/boardRoutes');
+    const boardRoutes = require('./routes/boardRoutes');
     this.app.use('/api/boards', boardRoutes);
 
-    const taskRoutes = require('../src/routes/taskRoutes');
+    const taskRoutes = require('./routes/taskRoutes');
     this.app.use('/api/tasks', taskRoutes);
 
-    // Root API
     this.app.get('/api', (req: Request, res: Response) => {
       res.json({ message: 'Realtime Task Board API v1' });
     });
   }
-
 
   private initializeSocketHandlers(): void {
     global.io = this.io;
@@ -109,9 +116,7 @@ export class App {
       socket.on('leave-board', (boardId: string) => {
         socket.leave(`board:${boardId}`);
 
-        console.log(
-          `User ${socket.data.user.userId} left board ${boardId}`
-        );
+        console.log(`User ${socket.data.user.userId} left board ${boardId}`);
       });
 
       socket.on('disconnect', () => {
@@ -122,7 +127,7 @@ export class App {
 
   public listen(port: number): void {
     this.server.listen(port, () => {
-      console.log(`🚀 Backend server running on http://localhost:${port}`);
+      console.log(`🚀 Backend server running on port ${port}`);
     });
   }
 }
