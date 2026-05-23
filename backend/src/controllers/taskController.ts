@@ -6,7 +6,7 @@ import { AuthRequest } from '../middleware/requireAuth';
 interface CreateTaskBody {
   title: string;
   description?: string;
-  status?: 'todo' | 'in-progress' | 'done';
+  status?: 'to-do' | 'in-progress' | 'done';
   boardId: string;
   position?: number;
 }
@@ -56,7 +56,7 @@ export const createTask = async (req: AuthRequest, res: Response): Promise<void>
     const task = new Task({
       title,
       description,
-      status: status || 'todo',
+      status: status || 'to-do',
       board: boardId,
       position: position || 0,
       assignee: req.user!.userId,

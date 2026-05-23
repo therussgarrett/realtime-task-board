@@ -157,7 +157,7 @@ const BoardPage: React.FC = () => {
       </form>
 
       <div className="grid grid-cols-3 gap-6">
-        {['todo', 'in-progress', 'done'].map(status => (
+        {['to-do', 'in-progress', 'done'].map(status => (
           <div key={status} className="bg-white rounded-lg shadow-sm border">
             <div className="px-6 py-4 border-b bg-gray-50 rounded-t-lg">
               <h2 className="text-lg font-semibold capitalize text-gray-900">
@@ -213,7 +213,7 @@ const BoardPage: React.FC = () => {
                             onChange={(e) => handleStatusChange(task._id, e.target.value as Task['status'])}
                             className="ml-2 px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                           >
-                            <option value="todo">Todo</option>
+                            <option value="to-do">To Do</option>
                             <option value="in-progress">In Progress</option>
                             <option value="done">Done</option>
                           </select>

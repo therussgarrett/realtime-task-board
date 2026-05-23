@@ -65,8 +65,7 @@ const HomePage = () => (
   <div className="max-w-4xl mx-auto px-6 py-20 text-center">
     <h1 className="text-5xl font-bold text-gray-900 mb-6">Realtime Task Board</h1>
     <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-      Collaborative boards with live updates and Python-powered analytics.
-    </p>
+      Collaborative task boards with secure accounts, live updates, and simple task management.    </p>
     <div className="space-x-4">
       <Link
         to="/boards"

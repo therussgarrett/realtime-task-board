@@ -7,7 +7,7 @@ export interface Task {
   _id: string;
   title: string;
   description?: string;
-  status: 'todo' | 'in-progress' | 'done';
+  status: 'to-do' | 'in-progress' | 'done';
   board: string;
   position: number;
   assignee?: { _id: string; email: string };
@@ -53,7 +53,7 @@ export const useTasks = () => {
   const createTask = useCallback(async (taskData: {
     title: string;
     description?: string;
-    status?: 'todo' | 'in-progress' | 'done';
+    status?: 'to-do' | 'in-progress' | 'done';
     position?: number;
   }) => {
     try {

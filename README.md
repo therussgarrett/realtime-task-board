@@ -6,12 +6,12 @@
 [![Socket.io](https://img.shields.io/badge/Socket.io-black?style=for-the-badge&logo=socket.io&logoColor=white)](https://socket.io/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://mongodb.com/)
 
-Real-time collaborative task board (Trello-style). Multiple users can create boards, add tasks, drag between columns, and see live updates.
+Real-time collaborative task board (Trello-style). Multiple users can create boards, add tasks, organize work across columns, and see live updates.
 
 ## ✨ Features
 
 - 🔐 JWT authentication (register/login)
-- 👥 Real-time collaboration via Socket.io (live task updates, presence)
+- 👥 Real-time collaboration via Socket.io with live task updates
 - 🧩 Organize tasks across workflow columns (Todo → In Progress → Done)
 - 🏗️ TypeScript end-to-end (frontend + backend)
 - 🧪 Basic backend/frontend testing setup
@@ -20,11 +20,10 @@ Real-time collaborative task board (Trello-style). Multiple users can create boa
 ## 🏗️ Architecture
 
 ```text
-┌─────────────────┐    ┌──────────────────┐    ┌──────────────┐
-│   React + TS    │◄──►│ Express + Socket │◄──►│   MongoDB    │
-│   (Frontend)    │    │   io + TS        │    │              │
-└─────────────────┘    └──────────────────┘    └──────────────┘
-                        
+┌─────────────────┐    ┌─────────────────────┐    ┌──────────────┐
+│   React + TS    │◄──►│ Express + Socket.io │◄──►│   MongoDB    │
+│   (Frontend)    │    │         + TS        │    │              │
+└─────────────────┘    └─────────────────────┘    └──────────────┘
 ```
 
 ## 🚀 Quick Start
@@ -118,11 +117,11 @@ cd ../frontend && npm run test
 
 1.  Fork the project
 
-2.  Create feature branch: git checkout -b feature/AmazingFeature
+2.  Create feature branch: `git checkout -b feature/AmazingFeature`
 
-3.  Commit: git commit -m "feat: add AmazingFeature"
+3.  Commit: `git commit -m "feat: add AmazingFeature"`
 
-4.  Push: git push origin feature/AmazingFeature
+4.  Push: `git push origin feature/AmazingFeature`
 
 5.  Open Pull Request
 

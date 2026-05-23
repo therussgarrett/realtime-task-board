@@ -5,7 +5,7 @@ import { IUser } from './User';
 export interface ITask extends Document {
   title: string;
   description?: string;
-  status: 'todo' | 'in-progress' | 'done';
+  status: 'to-do' | 'in-progress' | 'done';
   board: IBoard['_id'];
   position: number; // For drag/drop ordering
   assignee?: IUser['_id'];
@@ -13,33 +13,33 @@ export interface ITask extends Document {
 }
 
 const TaskSchema: Schema = new Schema({
-  title: { 
-    type: String, 
-    required: true, 
-    maxlength: 200 
+  title: {
+    type: String,
+    required: true,
+    maxlength: 200
   },
-  description: { 
-    type: String, 
-    maxlength: 1000 
+  description: {
+    type: String,
+    maxlength: 1000
   },
-  status: { 
-    type: String, 
-    enum: ['todo', 'in-progress', 'done'],
-    default: 'todo'
+  status: {
+    type: String,
+    enum: ['to-do', 'in-progress', 'done'],
+    default: 'to-do'
   },
-  board: { 
-    type: Schema.Types.ObjectId, 
-    ref: 'Board', 
-    required: true 
+  board: {
+    type: Schema.Types.ObjectId,
+    ref: 'Board',
+    required: true
   },
-  position: { 
-    type: Number, 
+  position: {
+    type: Number,
     required: true,
     default: 0
   },
-  assignee: { 
-    type: Schema.Types.ObjectId, 
-    ref: 'User' 
+  assignee: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
   }
 }, {
   timestamps: true
