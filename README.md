@@ -12,9 +12,9 @@ Real-time collaborative task board (Trello-style). Multiple users can create boa
 
 - 🔐 JWT authentication (register/login)
 - 👥 Real-time collaboration via Socket.io (live task updates, presence)
-- 🧩 Drag & drop tasks between columns (Todo → In Progress → Done)
+- 🧩 Organize tasks across workflow columns (Todo → In Progress → Done)
 - 🏗️ TypeScript end-to-end (frontend + backend)
-- 🧪 Basic tests and API documentation
+- 🧪 Basic backend/frontend testing setup
 - 🐳 Docker Compose ready
 
 ## 🏗️ Architecture
@@ -24,11 +24,7 @@ Real-time collaborative task board (Trello-style). Multiple users can create boa
 │   React + TS    │◄──►│ Express + Socket │◄──►│   MongoDB    │
 │   (Frontend)    │    │   io + TS        │    │              │
 └─────────────────┘    └──────────────────┘    └──────────────┘
-                                │
-                       ┌──────────────────┐
-                       │ Python Analytics │
-                       │     Worker       │
-                       └──────────────────┘
+                        
 ```
 
 ## 🚀 Quick Start
@@ -42,7 +38,7 @@ Real-time collaborative task board (Trello-style). Multiple users can create boa
 ### 1. Clone & enter project
 
 ```bash
-git clone https://github.com/yourusername/realtime-task-board.git
+git clone https://github.com/therussgarrett/realtime-task-board.git
 cd realtime-task-board
 ```
 
@@ -110,17 +106,13 @@ cd ../frontend && npm run test
 
 ## 🎯 Future Enhancements
 
-- - [ ] Email notifications
-
-- - [ ] File attachments
-
-- - [ ] Advanced RBAC
-
-- - [ ] Redis scaling
-
-- - [ ] CI/CD pipeline
-
-- - [ ] PWA support
+- [ ] Drag-and-drop task movement
+- [ ] Email notifications
+- [ ] File attachments
+- [ ] Advanced RBAC
+- [ ] Redis scaling
+- [ ] CI/CD pipeline
+- [ ] PWA support
 
 ## 🤝 Contributing
 
