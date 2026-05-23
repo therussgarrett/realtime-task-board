@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useMemo, ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
+import { API_URL } from '../config/api';
 
 interface SocketContextType {
   socket: Socket | null;
@@ -15,7 +16,7 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const socket = useMemo<Socket | null>(() => {
     if (!token) return null;
 
-    const s = io('http://localhost:4000', {
+    const s = io(API_URL, {
       auth: { token },
       autoConnect: false,
     });
@@ -27,11 +28,11 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     if (!socket) return;
 
     socket.on('connect', () => {
-      console.log('🟢 SOCKET CONNECTED:', socket.id); 
+      console.log('🟢 SOCKET CONNECTED:', socket.id);
     });
 
     socket.on('disconnect', () => {
-       console.log('🔴 SOCKET DISCONNECTED');
+      console.log('🔴 SOCKET DISCONNECTED');
     });
 
     socket.connect();

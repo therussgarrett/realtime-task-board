@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTasks, Task } from '../hooks/useTasks';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
+import { apiUrl } from '../config/api';
 
 
 const BoardPage: React.FC = () => {
@@ -25,7 +26,7 @@ const BoardPage: React.FC = () => {
       if (!boardId || !token) return;
 
       try {
-        const res = await fetch(`/api/boards/${boardId}`, {
+        const res = await fetch(apiUrl(`/api/boards/${boardId}`), {
           headers: {
             Authorization: `Bearer ${token}`,
           },

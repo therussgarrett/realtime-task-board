@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
+import { apiUrl } from '../config/api';
 
 export interface Task {
   _id: string;
@@ -32,7 +33,7 @@ export const useTasks = () => {
       setError(null);
       setLoading(true);
 
-      const res = await fetch(`/api/tasks/board/${boardId}`, {
+      const res = await fetch(apiUrl(`/api/tasks/board/${boardId}`), {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) {
@@ -61,7 +62,7 @@ export const useTasks = () => {
 
       setError(null);
 
-      const res = await fetch('/api/tasks', {
+      const res = await fetch(apiUrl('/api/tasks'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -93,7 +94,7 @@ export const useTasks = () => {
 
       setError(null);
 
-      const res = await fetch(`/api/tasks/${taskId}`, {
+      const res = await fetch(apiUrl(`/api/tasks/${taskId}`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -128,7 +129,7 @@ export const useTasks = () => {
     try {
       setError(null);
 
-      const res = await fetch(`/api/tasks/${taskId}`, {
+      const res = await fetch(apiUrl(`/api/tasks/${taskId}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
