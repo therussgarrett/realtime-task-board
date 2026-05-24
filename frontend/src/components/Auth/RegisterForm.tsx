@@ -18,9 +18,9 @@ const RegisterForm = () => {
     try {
       await register(email, password);
       navigate('/boards');
-    } catch (err) {
-      const errorResponse = err as { error?: string };
-      setError(errorResponse.error || 'Registration failed');
+    } catch (err: unknown) {
+      const errorResponse = err as { error?: string; message?: string };
+      setError(errorResponse.message || errorResponse.error || 'Registration failed');
     } finally {
       setLoading(false);
     }
@@ -59,7 +59,7 @@ const RegisterForm = () => {
       >
         {loading ? 'Creating account...' : 'Create Account'}
       </button>
-      
+
       <div className="text-center">
         <p className="text-sm text-gray-600">
           Already have an account?{' '}

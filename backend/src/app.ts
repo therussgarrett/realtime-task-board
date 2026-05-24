@@ -5,6 +5,7 @@ import { Server } from 'socket.io';
 import connectDB from './config/db';
 import { verifyToken } from './utils/jwt';
 import Board from './models/Board';
+import authRoutes from './routes/authRoutes';
 
 declare global {
   var io: Server;
@@ -54,7 +55,7 @@ export class App {
   }
 
   private initializeRoutes(): void {
-    const authRoutes = require('./routes/authRoutes');
+
     this.app.use('/api/auth', authRoutes);
 
     const boardRoutes = require('./routes/boardRoutes');

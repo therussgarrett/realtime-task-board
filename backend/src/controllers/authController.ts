@@ -3,6 +3,13 @@ import User, { IUser } from '../models/User';
 import { signToken } from '../utils/jwt';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
+  if (process.env.ALLOW_REGISTRATION === 'false') {
+    res.status(403).json({
+      success: false,
+      message: 'Registration is currently disabled for the live demo. Please use the demo account.',
+    });
+    return;
+  }
   try {
     const { email, password } = req.body;
 
@@ -53,8 +60,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     console.log('🔍 User found:', !!user); // DEBUG
 
     if (!user) {
-        console.log('❌ No user found for email:', email); //DEBUG
-        res.status(401).json({ error: 'Invalid credentials' });
+      console.log('❌ No user found for email:', email); //DEBUG
+      res.status(401).json({ error: 'Invalid credentials' });
       return;
     }
 
