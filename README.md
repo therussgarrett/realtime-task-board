@@ -8,6 +8,23 @@
 
 Real-time collaborative task board (Trello-style). Multiple users can create boards, add tasks, organize work across columns, and see live updates.
 
+## Live Demo
+
+[View the live app](https://realtime-task-board-hazel.vercel.app/)
+
+## Demo Access
+
+A demo account is available for quick access:
+
+**Email:** test@demo.com 
+**Password:** TEstDemo1
+
+Account registration may be limited on the live demo to help prevent abuse.
+
+## Preview
+
+![Screenshot of the Realtime Taskboard App dashboard](./screenshots/taskboard-dashboard.png)
+
 ## ✨ Features
 
 - 🔐 JWT authentication (register/login)
