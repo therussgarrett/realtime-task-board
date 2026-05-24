@@ -10,7 +10,7 @@ Real-time collaborative task board (Trello-style). Multiple users can create boa
 
 ## Live Demo
 
-[View the live app](https://realtime-task-board-hazel.vercel.app/)
+<a href="https://realtime-task-board-hazel.vercel.app/" target="_blank">View the live app</a>
 
 ## Demo Access
 
